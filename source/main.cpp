@@ -14,6 +14,8 @@ struct commandline_args_t
   float float_value;
   bool is_use_float_value;
 
+  bool is_use_preset_float_equation;
+
   int number_of_digits;
 
   std::string expected_string;
@@ -24,6 +26,7 @@ struct commandline_args_t
     is_use_numerator_and_denominator(false),
     float_value(0.0f),
     is_use_float_value(false),
+    is_use_preset_float_equation(false),
     number_of_digits(0),
     expected_string()
   {
@@ -48,6 +51,7 @@ void print_usage(int argc, char* argv[])
   fprintf(stderr, " -numerator <numerator> - numerator of rational input\n");
   fprintf(stderr, " -denominator <denominator> - denominator of rational input\n");
   fprintf(stderr, " -float <float> - floating point input\n");
+  fprintf(stderr, " -use_preset_float_equation - use internal value equal to 3.0 * (1.2 - -0.2)/256.0 \n");
 
   fprintf(stderr, "\nUSAGE EXAMPLE: %s -numerator 1 -denominator 3 -num_digits 3 -expected_string 0.333\n", argv[0]);
   fprintf(stderr, "\nUSAGE EXAMPLE: %s -float 0.33333333 -num_digits 3 -expected_string 0.333\n", argv[0]);
@@ -68,6 +72,7 @@ int process_commandline_args(int argc, char* argv[], commandline_args_t* args)
   bool is_float_parsed = false;
   bool is_digits_parsed = false;
   bool is_expected_string_parsed = false;
+  bool is_use_preset_float_equation_parsed = false;
 
   if (argc == 1)
   {
@@ -153,6 +158,20 @@ int process_commandline_args(int argc, char* argv[], commandline_args_t* args)
       }
     }
 
+    // is_use_preset_float_equation
+    else if (strcmp(argv[i], "-use_preset_float_equation") == 0)
+    {
+      if (true == is_use_preset_float_equation_parsed)
+      {
+        fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n -use_preset_float_equation is used twice, it may only be used once\n", __FUNCTION__, __FILE__, __LINE__);
+        return -1;
+      }
+
+      is_use_preset_float_equation_parsed = true;
+      args->is_use_preset_float_equation = true;
+
+    }
+
     // num_digits
     else if (strcmp(argv[i], "-digits") == 0)
     {
@@ -224,14 +243,30 @@ int process_commandline_args(int argc, char* argv[], commandline_args_t* args)
   // check that -numerator and -denominator are not used with -float
   if (true == is_numerator_parsed && true == is_float_parsed )
   {
-    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n -numerator and -denominator are used with -float, either (-numerator and -denominator) or must -float must be used, but not both\n", __FUNCTION__, __FILE__, __LINE__);
+    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n -numerator and -denominator cannot be used with -float\n", __FUNCTION__, __FILE__, __LINE__);
 
     return -1;
   }
 
-  if (false == is_numerator_parsed && false == is_float_parsed)
+  // check that -numerator and -denominator are not used with -float
+  if (true == is_numerator_parsed && true == is_use_preset_float_equation_parsed)
   {
-    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n either (-numerator and -denominator) or must -float must be used\n", __FUNCTION__, __FILE__, __LINE__);
+    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n -numerator and -denominator cannot be used with -is_use_preset_float_equation_parsed\n", __FUNCTION__, __FILE__, __LINE__);
+
+    return -1;
+  }
+
+  // check that -numerator and -denominator are not used with -float
+  if (true == is_float_parsed && true == is_use_preset_float_equation_parsed)
+  {
+    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n -float cannot be used with -is_use_preset_float_equation_parsed\n", __FUNCTION__, __FILE__, __LINE__);
+
+    return -1;
+  }
+
+  if (false == is_numerator_parsed && false == is_float_parsed && false == is_use_preset_float_equation_parsed)
+  {
+    fprintf(stderr, "USAGE ERROR in function %s of file %s on line %d:\n either (-numerator and -denominator) or must -float must be used or -use_preset_float_equation\n", __FUNCTION__, __FILE__, __LINE__);
 
     return -1;
   }
@@ -274,6 +309,10 @@ int main(int argc, char* argv[])
   else if (true == args.is_use_numerator_and_denominator)
   {
     float_value = (float)args.numerator / (float)args.denominator;
+  }
+  else if (true == args.is_use_preset_float_equation)
+  {
+    float_value = 3.0f * (1.2f - (-0.2f)) / 126.0f;
   }
 
   char sprintf_value[1024] = { '\0' };

@@ -51,7 +51,7 @@ void print_usage(int argc, char* argv[])
   fprintf(stderr, " -numerator <numerator> - numerator of rational input\n");
   fprintf(stderr, " -denominator <denominator> - denominator of rational input\n");
   fprintf(stderr, " -float <float> - floating point input\n");
-  fprintf(stderr, " -use_preset_float_equation - use internal value equal to 3.0 * (1.2 - -0.2)/256.0 \n");
+  fprintf(stderr, " -use_preset_float_equation - use internal value equal to 31.0f * (1.2f - (-0.2f) )/126.0f \n");
 
   fprintf(stderr, "\nUSAGE EXAMPLE: %s -numerator 1 -denominator 3 -num_digits 3 -expected_string 0.333\n", argv[0]);
   fprintf(stderr, "\nUSAGE EXAMPLE: %s -float 0.33333333 -num_digits 3 -expected_string 0.333\n", argv[0]);
@@ -312,7 +312,8 @@ int main(int argc, char* argv[])
   }
   else if (true == args.is_use_preset_float_equation)
   {
-    float_value = 3.0f * (1.2f - (-0.2f)) / 126.0f;
+    //float_value = 3.0f * (1.2f - (-0.2f)) / 126.0f;
+    float_value = 31.0f * (1.2f - (-0.2f)) / 126.0f;
   }
 
   char sprintf_value[1024] = { '\0' };
